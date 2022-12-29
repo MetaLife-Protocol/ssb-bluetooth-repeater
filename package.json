@@ -1,0 +1,29 @@
+{
+  "name": "ssb-bluetooth-repeater",
+  "version": "1.0.0",
+  "description": "A module for managing bluetooth connections over a react native bridge.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MetaLife-Protocol/ssb-bluetooth-repeater.git"
+  },
+  "author": "heroims",
+  "license": "MIT",
+  "dependencies": {
+    "debug": "^4.1.1",
+    "pull-defer": "^0.2.3",
+    "pull-json-doubleline": "^2.0.0",
+    "pull-pushable": "^2.2.0",
+    "pull-stream": "^3.6.9",
+    "pull-zip": "^2.0.1",
+    "stream-to-pull-stream": "^1.7.2",
+    "uuid": "^3.3.2"
+  },
+  "react-native": {
+    "os": "@staltz/react-native-os",
+    "rn-viewpager": "@staltz/rn-viewpager"
+  }
+}
