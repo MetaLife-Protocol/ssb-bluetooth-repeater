@@ -13,14 +13,14 @@ const uuidv4 = require('uuid/v4');
 const debug = require('debug')('ssb-bluetooth-repeater');
 
 const EventEmitter = require('events');
-let rnBridge;
 const delayedDeviceScanSource = pullDefer.source();
 
 const localHost='127.0.0.1';
 
-let scanActive = false;
 
 function makeManager (opts) {
+  let scanActive = false;
+  let rnBridge;
 
   const bluetoothScanStateEmitter = new EventEmitter();
 
@@ -108,9 +108,9 @@ function makeManager (opts) {
   function makeControlSocket() {
     if (controlSocketEstablished) return;
 
-    var controlSocket = net.createServer(function(stream){
+    let controlSocket = net.createServer(function(stream){
 
-      var duplexConnection = toPull.duplex(stream);
+      let duplexConnection = toPull.duplex(stream);
 
       // Send commands to the control server
       pull(controlSocketSource,
@@ -206,10 +206,10 @@ function makeManager (opts) {
       // The initial stream connection is just to the Unix socket. We don't know if that socket is proxying
       // the bluetooth connection successfully until we receive an event to tell us it's connected.
 
-      var addr = "bt:" + command.arguments.remoteAddress.split(":").join("");
+      let addr = "bt:" + command.arguments.remoteAddress.split(":").join("");
       debug("Setting outgoing stream address to " + addr);
 
-      var result = {
+      let result = {
         success: true,
         address: addr
       }
@@ -220,7 +220,7 @@ function makeManager (opts) {
       debug("Connected bluetooth devices is now: " + connectedDevices);
 
     } else if (commandName === "connected" && command.arguments.isIncoming) {
-      var incomingAddr = "bt:" + command.arguments.remoteAddress.split(":").join("");
+      let incomingAddr = "bt:" + command.arguments.remoteAddress.split(":").join("");
       debug("Setting incoming connection stream address to: " + incomingAddr);
 
       incomingAddressEstablished.push({
@@ -231,9 +231,9 @@ function makeManager (opts) {
       debug("Connected bluetooth devices is now: " + connectedDevices);
 
     } else if (commandName === "connectionFailure" && !command.arguments.isIncoming) {
-      var reason = command.arguments.reason;
+      let reason = command.arguments.reason;
 
-      var result = {
+      let result = {
         success: false,
         address: command.arguments.remoteAddress.split(":").join(""),
         failureReason: reason
@@ -246,8 +246,8 @@ function makeManager (opts) {
       debug("Connected bluetooth devices is now: " + connectedDevices);
 
     } else if (commandName === "discovered") {
-      var currentTime = Date.now();
-      var args = command.arguments;
+      let currentTime = Date.now();
+      let args = command.arguments;
 
       debug("Updating nearby source");
       debug(args);
@@ -258,7 +258,7 @@ function makeManager (opts) {
       else if (args.error === true) {
         awaitingDevicesCb(new Error(args.description), null);
       } else {
-        var nearBy = {
+        let nearBy = {
           lastUpdate: currentTime,
           discovered: args.devices
         }
@@ -270,7 +270,7 @@ function makeManager (opts) {
       }
 
     } else if (commandName === "discoverable") {
-      var args = command.arguments;
+      let args = command.arguments;
       if (args.error === true) {
         awaitingDiscoverableResponse(command.arguments);
       }
@@ -280,17 +280,17 @@ function makeManager (opts) {
 
       awaitingDiscoverableResponse = null;
     } else if (commandName === "isEnabled") {
-      var args = command.arguments;
+      let args = command.arguments;
       awaitingIsEnabledResponse(null, args.enabled);
     } else if (commandName === "ownMacAddress") {
-      var args = command.arguments;
+      let args = command.arguments;
       awaitingOwnMacAddressResponse(null, args.address);
     } else if (commandName === "getMetadata") {
-      var args = command.arguments;
+      let args = command.arguments;
 
-      var requestId = command.requestId;
+      let requestId = command.requestId;
 
-      var cb = awaitingMetadata[requestId];
+      let cb = awaitingMetadata[requestId];
 
       if (args.error === true) {
         cb(new Error(args.error.description), null);
@@ -315,10 +315,10 @@ function makeManager (opts) {
 
   function listenForOutgoingEstablished() {
 
-    var server = net.createServer(function(stream){
+    let server = net.createServer(function(stream){
       debug("bluetooth: Outgoing connection established proxy connection.")
 
-      var item = {
+      let item = {
         stream: logDuplexStreams(toPull.duplex(stream), 'outgoing')
       }
 
@@ -346,7 +346,7 @@ function makeManager (opts) {
   }
 
   // For some reason, .server gets called twice...
-  var started = false
+  let started = false
 
   function listenForIncomingConnections(onConnection) {
 
@@ -354,12 +354,12 @@ function makeManager (opts) {
 
     if(started) return
     
-    var server = net.createServer(function (incomingStream) {
+    let server = net.createServer(function (incomingStream) {
 
       // We only call back with the connection when we later receive the address over the control
       // bridge. See the 'onCommand' function.
 
-      var item = {
+      let item = {
         stream: logDuplexStreams(toPull.duplex(incomingStream), 'incoming')
       }
       rnBridge.channel.post('log4RN', 'incoming socket stream:' + JSON.stringify(item.stream));
@@ -405,8 +405,8 @@ function makeManager (opts) {
 
   function getValidAddresses(devices, cb) {
 
-    var results = [];
-    var count = 0;
+    let results = [];
+    let count = 0;
 
     if (devices.length === 0) {
       debug("No nearby devices to check for scuttlebutt metadata service.");
@@ -490,7 +490,7 @@ function makeManager (opts) {
       delayedDeviceScanSource,
       pull.asyncMap((next, cb) => {
 
-        var nextScanAfter = refreshInterval;
+        let nextScanAfter = refreshInterval;
 
         if (connectedDevices > 0) {
           debug("Connected device count is " + connectedDevices + ". Next scan will start after " + scanRefreshIntervalWhenConnected + " milliseconds");
@@ -525,12 +525,12 @@ function makeManager (opts) {
           cb(new Error(err.description), null);
         } else {
 
-          var payload = {
+          let payload = {
             "id": opts.myIdent
           };
 
           // The service should stop when the device is no longer discoverable
-          var serviceNeededForSeconds = Math.ceil((result.discoverableUntil - Date.now()) / 1000);
+          let serviceNeededForSeconds = Math.ceil((result.discoverableUntil - Date.now()) / 1000);
 
           // Only start the metadata service once the device is discoverable
           controlSocketSource.push({
@@ -573,7 +573,7 @@ function makeManager (opts) {
   }
 
   function getMetadataForDevice(deviceMacAddress, cb) {
-    var requestId = uuidv4();
+    let requestId = uuidv4();
 
     awaitingMetadata[requestId] = cb;
 
@@ -590,7 +590,7 @@ function makeManager (opts) {
 
   function bluetoothScanState() {
 
-    var source = Pushable(function (closed) {
+    let source = Pushable(function (closed) {
 
       debug("Closing bluetooth scan lifecycle event listeners.");
 
@@ -602,7 +602,7 @@ function makeManager (opts) {
     });
 
     function onScanStarted()  {
-      var event = {
+      let event = {
         "state": EVENT_STARTED_SCAN
       }
 
@@ -610,7 +610,7 @@ function makeManager (opts) {
     };
 
     function onBtDevicesFound (devices) {
-      var event = {
+      let event = {
         "state": EVENT_FOUND_BLUETOOTH_DEVICES,
         "update": devices
       }
@@ -619,7 +619,7 @@ function makeManager (opts) {
     }
 
     function onFinishedFindingBluetoothDevices() {
-      var event = {
+      let event = {
         "state": EVENT_FINISHED_FINDING_BLUETOOTH_DEVICES
       }
 
@@ -627,7 +627,7 @@ function makeManager (opts) {
     }
 
     function onCheckingDevices (update) {
-      var event = {
+      let event = {
         "state": EVENT_CHECKING_DEVICES,
         "update": update
       }
@@ -636,7 +636,7 @@ function makeManager (opts) {
     }
 
     function onFinishedCheckingDevices() {
-      var event = {
+      let event = {
         "state": EVENT_ENDED_CHECKING
       }
 
