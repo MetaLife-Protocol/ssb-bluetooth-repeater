@@ -277,8 +277,6 @@ function makeManager (opts) {
       else {
         awaitingDiscoverableResponse(null, command.arguments);
       }
-
-      awaitingDiscoverableResponse = null;
     } else if (commandName === "isEnabled") {
       let args = command.arguments;
       awaitingIsEnabledResponse(null, args.enabled);
@@ -510,7 +508,9 @@ function makeManager (opts) {
   function makeDeviceDiscoverable(forTime, cb) {
     debug("Making device discoverable");
     rnBridge.channel.post('log4RN', 'Making device discoverable');
-
+    setTimeout(() => {
+      awaitingDiscoverableResponse = null;
+    }, forTime);
     if (awaitingDiscoverableResponse != null) {
       cb(new Error("Already requesting to make device discoverable."), null)
     } else {
